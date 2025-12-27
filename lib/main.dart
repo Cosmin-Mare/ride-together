@@ -1,15 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mapbox_search/mapbox_search.dart';
 import 'package:ride_together/login.dart';
 import 'package:ride_together/firebase_options.dart';
 import 'package:ride_together/home.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  const String accessToken = String.fromEnvironment('ACCESS_TOKEN');
+  MapboxOptions.setAccessToken(accessToken);
+  MapBoxSearch.init(accessToken);
+  print("access token");
+  print(accessToken);
   runApp(const MainApp());
 }
 

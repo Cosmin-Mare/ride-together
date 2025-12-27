@@ -13,7 +13,10 @@ dependencies:
   firebase_core: ^4.3.0
   flutter:
     sdk: flutter
+  geolocator: ^14.0.2
   mapbox_maps_flutter: ^2.17.0
+  mapbox_search: ^4.3.2
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:

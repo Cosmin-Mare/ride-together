@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ride_together/custom_button.dart';
+import 'package:ride_together/widgets/custom_button.dart';
 import 'package:ride_together/home.dart';
 import 'package:ride_together/widgets/custom_text_field.dart';
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ride_together/design_constants.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? hintText;
@@ -15,8 +14,7 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = DesignConstants.calculateScale(MediaQuery.of(context).size.width);
-
+    // final double scale = DesignConstants.calculateScale(MediaQuery.of(context).size.width);
     return TextField(
       controller: controller,
       obscureText: isPassword,

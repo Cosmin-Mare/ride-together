@@ -10,7 +10,7 @@
             "type": "dart",
             "args": [
                 "--dart-define",
-                "ACCESS_TOKEN=YOUR_PUBLIC_MAPBOX_ACCESS_TOKEN"
+                "ACCESS_TOKEN=sk.eyJ1IjoiY29zbWluLW1hcmUiLCJhIjoiY21qb2E1ZG43MWliMTNtcXlwaG5peGpqbiJ9.yyPQcUXyhesIeY8TXgr6Wg"
             ],
         },
         {
@@ -20,7 +20,7 @@
             "flutterMode": "profile",
             "args": [
                 "--dart-define",
-                "ACCESS_TOKEN=YOUR_PUBLIC_MAPBOX_ACCESS_TOKEN"
+                "ACCESS_TOKEN=sk.eyJ1IjoiY29zbWluLW1hcmUiLCJhIjoiY21qb2E1ZG43MWliMTNtcXlwaG5peGpqbiJ9.yyPQcUXyhesIeY8TXgr6Wg"
             ],
         },
         {
@@ -30,7 +30,7 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define",
-                "ACCESS_TOKEN=YOUR_PUBLIC_MAPBOX_ACCESS_TOKEN"
+                "ACCESS_TOKEN=sk.eyJ1IjoiY29zbWluLW1hcmUiLCJhIjoiY21qb2E1ZG43MWliMTNtcXlwaG5peGpqbiJ9.yyPQcUXyhesIeY8TXgr6Wg"
             ],
         }
     ]
