@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "216937294504",
+    "project_id": "ride-together-f2720",
+    "storage_bucket": "ride-together-f2720.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216937294504:android:bd9b116e3f2cfd074a309d",
+        "android_client_info": {
+          "package_name": "com.example.ride_together"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "216937294504-ffol61d6j3hhjuejumcga1sjj94hh96c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_6tXNO-2ApKU4lfNGWA4SdH-D4nUO4Xc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "216937294504-ffol61d6j3hhjuejumcga1sjj94hh96c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

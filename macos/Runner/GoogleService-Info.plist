@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>216937294504-jbigf29nnt26jqtj9eovf7vjvflm99f8.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.216937294504-jbigf29nnt26jqtj9eovf7vjvflm99f8</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDjq21WsAPDqb4yYIe6XyHu1y4EckMRNN0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>216937294504</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.rideTogether</string>
+	<key>PROJECT_ID</key>
+	<string>ride-together-f2720</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ride-together-f2720.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:216937294504:ios:70d3eece73a4f4c94a309d</string>
+</dict>
+</plist>
