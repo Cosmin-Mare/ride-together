@@ -134,9 +134,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
           }).toList() as List<String>;
           _isLoading = false;
         });
-        if (searchSuggestions.isNotEmpty) {
-          _animationController.forward();
-        }
+        _animationController.forward();
       } else {
         print("Error getting suggestions");
         print(result.statusCode);
@@ -307,7 +305,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
             child: SlideTransition(
               position: _slideAnimation,
               child: Container(
-                margin: EdgeInsets.only(top: 8),
+                margin: const EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -315,35 +313,49 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
                       blurRadius: 10,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 200),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searchSuggestions.length,
-                    itemBuilder: (context, index) {
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () async {
-                            widget.focusNode.unfocus();
-                            await _selectLocation(placeIds[index]);
-                          },
-                          borderRadius: BorderRadius.circular(10),
-                          child: ListTile(
-                            leading: Icon(Icons.location_on, color: Colors.grey.shade700),
-                            title: Text(
-                              searchSuggestions[index],
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: searchSuggestions.isNotEmpty 
+                    ? ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: searchSuggestions.length,
+                        itemBuilder: (context, index) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                widget.focusNode.unfocus();
+                                await _selectLocation(placeIds[index]);
+                              },
+                              borderRadius: BorderRadius.circular(10),
+                              child: ListTile(
+                                leading: Icon(Icons.location_on, color: Colors.grey.shade700),
+                                title: Text(
+                                  searchSuggestions[index],
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ) 
+                    : const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Center(
+                          child: Text(
+                            'No suggestions found', 
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
                 ),
               ),
             ),

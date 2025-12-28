@@ -28,7 +28,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   void setRideRequested(){
     print("Setting Ride Requested");
-    FirebaseFirestore.instance.collection('rides').where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', isNotEqualTo: 'completed').get().then((value) {
+    FirebaseFirestore.instance.collection('rides').where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', whereNotIn: ['completed', 'cancelled']).get().then((value) {
       setState(() {
         if(value.docs.isNotEmpty){
           rideRequested = Ride.fromJson({
@@ -47,7 +47,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         print(doc.data());
       }
     });
-    FirebaseFirestore.instance.collection('rides').where('driver.userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', isNotEqualTo: 'completed').get().then((value) {
+    FirebaseFirestore.instance.collection('rides').where('driver.userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', whereNotIn: ['completed', 'cancelled']).get().then((value) {
       print("docs");
       print(value.docs);
       setState(() {

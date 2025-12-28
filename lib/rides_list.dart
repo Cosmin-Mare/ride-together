@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:ride_together/home.dart';
 import 'package:ride_together/models.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 
@@ -41,12 +42,13 @@ class _RidesListState extends State<RidesList> {
         'userId': FirebaseAuth.instance.currentUser?.uid,
       }
     });
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
   }
 
   @override
   Widget build(BuildContext context) {
     return 
-      Stack(
+      widget.rides.isNotEmpty ? Stack(
         children: [
           Scaffold(
             body: PageView.builder(
@@ -115,45 +117,46 @@ class _RidesListState extends State<RidesList> {
               },
             ),
           ),
+            Positioned(
+                bottom: 40,
+                right: 10,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    FloatingActionButton(
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      backgroundColor: Colors.black,
+                      child: const Icon(Icons.arrow_forward, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
           Positioned(
               bottom: 40,
-              right: 10,
+              left: 10,
               child: Column(
                 children: [
                   const SizedBox(height: 8),
                   FloatingActionButton(
                     onPressed: () {
-                      _pageController.nextPage(
+                      _pageController.previousPage(
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeInOut,
                       );
                     },
                     backgroundColor: Colors.black,
-                    child: const Icon(Icons.arrow_forward, color: Colors.white),
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
                 ],
               ),
-            ),
-        Positioned(
-            bottom: 40,
-            left: 10,
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  onPressed: () {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  backgroundColor: Colors.black,
-                  child: const Icon(Icons.arrow_back, color: Colors.white),
-                ),
-              ],
-            ),
-          ), 
-        ]
-      );
+            ), 
+          ]
+        )
+    : Center(child: Text('No rides found'));
   }
 }

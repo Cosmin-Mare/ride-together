@@ -37,7 +37,23 @@ class MainApp extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
+          surfaceTintColor: Colors.white,
         ),
+        tabBarTheme: TabBarThemeData(
+          overlayColor: WidgetStateProperty.all(Colors.white),
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(color: Colors.black, width: 2),
+            insets: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          indicatorColor: Colors.black,
+          
+        ),
+        primaryColor: Colors.black,
       ),
       locale: const Locale('en'),
       supportedLocales: const [

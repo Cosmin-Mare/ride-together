@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ride_together/bottom_panel.dart';
+import 'package:ride_together/home.dart';
 import 'package:ride_together/models.dart';
 import 'package:ride_together/utils.dart';
 
@@ -37,6 +38,7 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
         .collection('rides')
         .doc(widget.ride.id)
         .snapshots();
+    _listenToRideStatus(widget.ride);
   }
 
   Future<void> getRoute(Position from, Position to) async {
@@ -166,6 +168,34 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
 
       mapboxMap!.flyTo(cameraOptions, MapAnimationOptions(duration: 1500));
     }
+  }
+
+  void _checkRideStatus(Ride ride) {
+    if(ride.status == RideStatus.cancelled) {
+      print("Ride Cancelled");
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ride Cancelled')),
+        );
+      });
+
+    }
+  }
+  
+  void _listenToRideStatus(Ride ride) {
+    _rideStream.listen((snapshot) {
+      if(snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data()!;
+        data['id'] = snapshot.id;
+        _checkRideStatus(Ride.fromJson(data));
+      }
+    });
+  }
+  @override
+  void dispose() {
+    _rideStream.drain();
+    super.dispose();
   }
 
   @override
