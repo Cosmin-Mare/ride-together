@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ride_together/models.dart';
 import 'package:ride_together/ride_details_page.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 import 'package:ride_together/widgets/location_search_bar.dart';

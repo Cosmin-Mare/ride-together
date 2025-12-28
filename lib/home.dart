@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ride_together/models.dart';
 import 'package:ride_together/request_ride_page.dart';
 import 'package:ride_together/available_rides_page.dart';
 import 'package:ride_together/ride_details_page.dart';
@@ -34,7 +35,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ...value.docs[0].data(),
             'id': value.docs[0].id,
           });
-          print("Ride Requested: ${rideRequested?.toJson()}");
         } else {
           rideRequested = null;
         }

@@ -4,30 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:http/http.dart' as http;
-
-class CustomLocation {
-  final String name;
-  final String address;
-  final double latitude;
-  final double longitude;
-
-  
-  CustomLocation({
-    required this.name,
-    required this.address,
-    required this.latitude,
-    required this.longitude,
-  });
-
-  toJson() {
-    return {
-      'name': name,
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
-    };
-  }
-}
+import 'package:ride_together/models.dart';
+import 'package:ride_together/ride_details_page.dart';
 
 class LocationSearchBar extends StatefulWidget {
   const LocationSearchBar({
@@ -61,7 +39,6 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
   List<String> placeIds = [];
   Timer? _debounce;
   bool _ignoreNextChange = false;
-  String _lastSelectedText = '';
   bool _isLoading = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -109,6 +86,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
       }
     });
   }
+
 
   void _updateSuggestions(String query) async {
     if(widget.selectedLocationViaPin) {

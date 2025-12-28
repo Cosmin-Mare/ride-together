@@ -7,52 +7,60 @@ class CustomButton extends StatelessWidget {
   final double? fontSize;
   final Icon? icon;
 
-  const CustomButton({super.key, required this.text, required this.onPressed, this.size, this.fontSize, this.icon});
+  const CustomButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.size,
+    this.fontSize,
+    this.icon,
+  });
 
   @override
-Widget build(BuildContext context) {
-  return ElevatedButton(
-    onPressed: onPressed,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.black,
-      foregroundColor: Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: size?.width ?? 20, 
-        vertical: size?.height ?? 10
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        // Using minimumSize ensures the button fills the SizedBox constraints
+        minimumSize: Size(size?.width ?? 0, size?.height ?? 0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-    ),
-    child: icon != null 
-      ? Row(
-          mainAxisSize: MainAxisSize.min, // Fix 1: Don't take full width
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Fix 2: Wrap text in Flexible if it's very long
-            Flexible(
+      child: icon != null
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown, // Shrinks text if it doesn't fit
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: fontSize ?? 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10), // Gap between text and icon
+                icon!,
+              ],
+            )
+          : FittedBox(
+              fit: BoxFit.scaleDown,
               child: Text(
                 text,
                 style: TextStyle(
-                  color: Colors.white, 
-                  fontSize: fontSize ?? 16, 
-                  fontWeight: FontWeight.bold
+                  color: Colors.white,
+                  fontSize: fontSize ?? 16,
+                  fontWeight: FontWeight.bold,
                 ),
-                overflow: TextOverflow.ellipsis, // Prevents text from pushing icon off-screen
               ),
             ),
-            const SizedBox(width: 8), // Add a small gap between text and icon
-            icon!,
-          ],
-        ) 
-      : Text(
-          text, 
-          style: TextStyle(
-            color: Colors.white, 
-            fontSize: fontSize ?? 16, 
-            fontWeight: FontWeight.bold
-          )
-        ),
-  );
-}
+    );
   }
+}

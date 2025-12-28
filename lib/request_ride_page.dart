@@ -6,7 +6,10 @@ import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ride_together/confirm_ride_page.dart';
+import 'package:ride_together/models.dart';
+import 'package:ride_together/utils.dart';
 import 'package:ride_together/widgets/location_search_bar.dart';
+import 'package:ride_together/ride_details_page.dart';
 
 class RequestRidePage extends StatefulWidget {
   const RequestRidePage({super.key});
@@ -55,7 +58,7 @@ class _RequestRidePageState extends State<RequestRidePage>
   Future<void> _initLocation() async {
     PermissionStatus status = await Permission.locationWhenInUse.request();
     if (status.isGranted) {
-      final position = await _getCurrentPosition();
+      final position = await getCurrentPosition();
       if (position != null) {
         setState(() {
           currentPosition = position;
@@ -77,18 +80,6 @@ class _RequestRidePageState extends State<RequestRidePage>
         }
       }
     }
-  }
-
-  Future<geolocator.Position?> _getCurrentPosition() async {
-    bool serviceEnabled = await geolocator.Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return null;
-    geolocator.LocationPermission permission =
-        await geolocator.Geolocator.checkPermission();
-    if (permission == geolocator.LocationPermission.denied) {
-      permission = await geolocator.Geolocator.requestPermission();
-      if (permission == geolocator.LocationPermission.denied) return null;
-    }
-    return await geolocator.Geolocator.getCurrentPosition();
   }
 
   void _onMapCreated(MapboxMap mapboxMap) {
@@ -123,7 +114,6 @@ class _RequestRidePageState extends State<RequestRidePage>
     const googleApiKey = String.fromEnvironment('GOOGLE_API_KEY'); // or store securely
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$googleApiKey');
-
     try {
       setState(() => locationLoading = true);
 

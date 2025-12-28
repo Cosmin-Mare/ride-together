@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:ride_together/models.dart';
 import 'package:ride_together/ride_details_page.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 
@@ -28,10 +30,16 @@ class _RidesListState extends State<RidesList> {
     print("Rides: ${widget.rides.map((ride) => ride.userName).toList()}");
   }
 
-  void _acceptRide(Ride ride) {
+  void _acceptRide(Ride ride) async {
+    final position = await Geolocator.getCurrentPosition();
     FirebaseFirestore.instance.collection('rides').doc(ride.id).update({
-      'status': 'accepted',
-      'driver': FirebaseAuth.instance.currentUser?.uid,
+      'status': 'inProgress',
+      'driver': {
+        'name': FirebaseAuth.instance.currentUser?.displayName ?? '',
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'profilePicture': FirebaseAuth.instance.currentUser?.photoURL,
+      }
     });
   }
 
@@ -91,9 +99,12 @@ class _RidesListState extends State<RidesList> {
                               SizedBox(
                                 width: double.infinity,
                                 height: 60,
-                                child: CustomButton(text: "Accept Ride", onPressed: () {
-                                  _acceptRide(ride);
-                                }, size: Size(80, 10), fontSize: 26, icon: Icon(Icons.arrow_forward, size: 40, color: Colors.white)),
+                                child: CustomButton(
+                                  text: "Accept Ride",
+                                  onPressed: () => _acceptRide(ride),
+                                  fontSize: 26,
+                                  icon: const Icon(Icons.arrow_forward, size: 40, color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
