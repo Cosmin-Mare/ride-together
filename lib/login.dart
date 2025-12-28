@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 import 'package:ride_together/home.dart';
@@ -109,6 +111,7 @@ class _SignupState extends State<Signup> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final displayNameController = TextEditingController();
   String errorMessage = "";
   @override
   Widget build(BuildContext context) {
@@ -121,6 +124,12 @@ class _SignupState extends State<Signup> {
           children: [
             Text('Ride Together', style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
             SizedBox(height: 80),
+            CustomTextField(
+              hintText: 'Display Name',
+              controller: displayNameController,
+              isName: true,
+            ),
+            SizedBox(height: 10),
             CustomTextField(
               hintText: 'Email',
               controller: emailController,
@@ -143,63 +152,92 @@ class _SignupState extends State<Signup> {
               Text(errorMessage, style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
             ],
-            CustomButton(
-              onPressed: () async {
-                try {
-                  if(passwordController.text != confirmPasswordController.text){
-                    setState(() {
-                      errorMessage = "Passwords do not match";
-                    });
-                    return;
-                  }
-                  final result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  if(result.user != null){
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
-                  }
-                } on FirebaseAuthException catch (e) {
-                  print(e);
-                  setState(() {
-                    switch (e.code) {
-                      case 'invalid-email':
-                        errorMessage = "Invalid email";
-                        break;
-                      case 'weak-password':
-                        errorMessage = "Weak password";
-                        break;
-                      case 'email-already-in-use':
-                        errorMessage = "Email already in use";
-                        break;
-                      case 'operation-not-allowed':
-                        errorMessage = "Operation not allowed";
-                        break;
-                      case 'too-many-requests':
-                        errorMessage = "Too many requests";
-                        break;
-                      case 'invalid-credential':
-                        errorMessage = "Your account uses a different sign-in method";
-                        break;
-                      default:
-                        errorMessage = "An unknown error occurred";
-                        break;
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 10,
+              children: [
+                CustomButton(
+                  onPressed: () async {
+                    try {
+                      if(passwordController.text != confirmPasswordController.text){
+                        setState(() {
+                          errorMessage = "Passwords do not match";
+                        });
+                        return;
+                      }
+                      final result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      );
+                      if(result.user != null){
+                        await result.user!.updateDisplayName(displayNameController.text);
+                        await FirebaseFirestore.instance.collection('users').doc(result.user!.uid).set({
+                          'displayName': displayNameController.text,
+                          'email': emailController.text,
+                          'password': passwordController.text,
+                          'createdAt': DateTime.now(),
+                          'updatedAt': DateTime.now(),
+                          'uid': result.user!.uid,
+                        });
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+                
+                      }
+                    } on FirebaseAuthException catch (e) {
+                      print(e);
+                      setState(() {
+                        switch (e.code) {
+                          case 'invalid-email':
+                            errorMessage = "Invalid email";
+                            break;
+                          case 'weak-password':
+                            errorMessage = "Weak password";
+                            break;
+                          case 'email-already-in-use':
+                            errorMessage = "Email already in use";
+                            break;
+                          case 'operation-not-allowed':
+                            errorMessage = "Operation not allowed";
+                            break;
+                          case 'too-many-requests':
+                            errorMessage = "Too many requests";
+                            break;
+                          case 'invalid-credential':
+                            errorMessage = "Your account uses a different sign-in method";
+                            break;
+                          default:
+                            errorMessage = "An unknown error occurred";
+                            break;
+                        }
+                      });
                     }
-                  });
-                }
-              },
-              text: "Sign up",
+                  },
+                  text: "Sign up",
+                ),
+                CustomButton(
+                  onPressed: () async {
+                    final result = await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
+                    if(result.user != null){
+                      await FirebaseFirestore.instance.collection('users').doc(result.user!.uid).set({
+                        'displayName': result.user!.displayName,
+                        'email': result.user!.email,
+                        'createdAt': DateTime.now(),
+                        'updatedAt': DateTime.now(),
+                        'provider': 'google',
+                        'photoURL': result.user!.photoURL,
+                        'uid': result.user!.uid,
+                      });
+                    }
+                  },
+                    text: "Sign up with Google",
+                ),
+              ],
             ),
             CustomButton(
+              size: Size(120, 0),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Login())),
               text: "Login",
             ),
-            CustomButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
-              },
-                text: "Sign up with Google",
-              ),
             ],
           ),
         ),

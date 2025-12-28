@@ -1,24 +1,32 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mapbox_search/mapbox_search.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:ride_together/confirm_ride_page.dart';
+import 'package:http/http.dart' as http;
 
-class LocationSuggestion {
+class CustomLocation {
   final String name;
   final String address;
   final double latitude;
   final double longitude;
-  final String? mapboxId;
+
   
-  LocationSuggestion({
+  CustomLocation({
     required this.name,
     required this.address,
     required this.latitude,
     required this.longitude,
-    this.mapboxId,
   });
+
+  toJson() {
+    return {
+      'name': name,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
 }
 
 class LocationSearchBar extends StatefulWidget {
@@ -30,35 +38,40 @@ class LocationSearchBar extends StatefulWidget {
     required this.focusNode,
     this.selectedLocation,
     this.onRequestRide,
+    this.selectedLocationViaPin = false,
+    required this.setSelectedLocationViaPin,
+    required this.locationLoading,
   });
   
   final TextEditingController controller;
   final geolocator.Position? currentPosition;
-  final Function(LocationSuggestion) onLocationSelected;
+  final Function(CustomLocation) onLocationSelected;
   final FocusNode focusNode;
-  final LocationSuggestion? selectedLocation;
+  final CustomLocation? selectedLocation;
   final VoidCallback? onRequestRide;
-  
+  final bool selectedLocationViaPin;
+  final Function(bool) setSelectedLocationViaPin;
+  final bool locationLoading;
   @override
   State<LocationSearchBar> createState() => _LocationSearchBarState();
 }
 
 class _LocationSearchBarState extends State<LocationSearchBar> with SingleTickerProviderStateMixin {
-  List<LocationSuggestion> searchSuggestions = [];
+  List<String> searchSuggestions = [];
+  List<String> placeIds = [];
   Timer? _debounce;
-  final searchAPI = SearchBoxAPI(limit: 3);
   bool _ignoreNextChange = false;
   String _lastSelectedText = '';
-  LocationSuggestion? _lastSelectedLocation;
   bool _isLoading = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  late String sessionToken;
 
   @override
   void initState() {
     super.initState();
-    
+    sessionToken = DateTime.now().millisecondsSinceEpoch.toString();
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -76,24 +89,32 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
     );
     
     widget.controller.addListener(() {
-      _onSearchChanged(widget.controller.text);
+      if(!widget.selectedLocationViaPin) {
+        _onSearchChanged(widget.controller.text);
+      }
     });
     
     widget.focusNode.addListener(() {
-      if (!widget.focusNode.hasFocus) {
-        if (_lastSelectedLocation != null && widget.controller.text != _lastSelectedText) {
-          _revertToLastSelected();
-        } else {
-          setState(() {
-            searchSuggestions = [];
-          });
-          _animationController.reverse();
+      if(widget.focusNode.hasFocus) {
+        if(widget.selectedLocationViaPin) {
+          widget.setSelectedLocationViaPin(false);
+          widget.controller.text = "";
         }
+      }
+      if (!widget.focusNode.hasFocus) {
+        setState(() {
+          searchSuggestions = [];
+        });
+        _animationController.reverse();
       }
     });
   }
 
   void _updateSuggestions(String query) async {
+    if(widget.selectedLocationViaPin) {
+      return;
+    }
+    print(widget.selectedLocationViaPin);
     print("Getting suggestions for $query");
     if (query.length < 3) {
       if (mounted) {
@@ -111,29 +132,29 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
     });
     
     try {
-      final result = await searchAPI.getSuggestions(
-        query,
-        proximity: Proximity.LatLong(
-          lat: widget.currentPosition?.latitude ?? 0, 
-          long: widget.currentPosition?.longitude ?? 0
-        ),
+      final uri = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+        '?input=$query'
+        '&key=${const String.fromEnvironment('GOOGLE_API_KEY')}'
+        '&sessiontoken=$sessionToken'
+        '&location=${widget.currentPosition?.latitude},${widget.currentPosition?.longitude}'
+        '&radius=5000'
       );
-
+      print(sessionToken);
+      final result = await http.get(uri);
       if (!mounted) return;
 
-      if (result.success != null) {
-        final suggestions = result.success!.suggestions;
+      if (result.statusCode == 200) {
+        final suggestions = json.decode(result.body)['predictions'];
         
         setState(() {
-          searchSuggestions = suggestions.map((s) {
-            return LocationSuggestion(
-              name: s.name,
-              address: s.fullAddress ?? '',
-              latitude: 0.0,
-              longitude: 0.0,
-              mapboxId: s.mapboxId,
-            );
-          }).toList();
+          searchSuggestions = suggestions.map<String>((s) {
+            return s['description'] as String? ?? '';
+          }).toList() as List<String>;
+
+          placeIds = suggestions.map<String>((s) {
+            return s['place_id'] as String? ?? '';
+          }).toList() as List<String>;
           _isLoading = false;
         });
         
@@ -141,7 +162,9 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
           _animationController.forward();
         }
       } else {
-        print(result.failure);
+        print("Error getting suggestions");
+        print(result.statusCode);
+        print(result.body);
         setState(() {
           searchSuggestions = [];
           _isLoading = false;
@@ -160,33 +183,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
     }
   }
 
-  Future<LocationSuggestion?> _retrieveLocationDetails(LocationSuggestion suggestion) async {
-    if (suggestion.mapboxId == null) return null;
-    
-    try {
-      final result = await searchAPI.getPlace(suggestion.mapboxId!);
-      
-      if (result.success != null && result.success!.features.isNotEmpty) {
-        final feature = result.success!.features.first;
-        final coords = feature.geometry?.coordinates;
-        
-        if (coords != null) {
-          return LocationSuggestion(
-            name: suggestion.name,
-            address: suggestion.address,
-            longitude: coords.long ?? 0.0,
-            latitude: coords.lat ?? 0.0,
-            mapboxId: suggestion.mapboxId,
-          );
-        }
-      }
-    } catch (e) {
-      print('Error retrieving location details: $e');
-    }
-    return null;
-  }
-
-  Future<void> _selectLocation(LocationSuggestion suggestion) async {
+  Future<void> _selectLocation(String placeId) async {
     _ignoreNextChange = true;
     
     setState(() {
@@ -194,33 +191,29 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
       _isLoading = true;
     });
     _animationController.reverse();
+
+    final uri = Uri.parse(
+      'https://maps.googleapis.com/maps/api/place/details/json'
+      '?place_id=$placeId'
+      '&fields=geometry,name,formatted_address'
+      '&key=${const String.fromEnvironment('GOOGLE_API_KEY')}',
+    );
+    final result = await http.get(uri);
+    final data = json.decode(result.body);
     
-    final fullLocation = await _retrieveLocationDetails(suggestion);
-    
-    if (fullLocation != null) {
-      _lastSelectedLocation = fullLocation;
-      _lastSelectedText = fullLocation.name;
-      
-      widget.onLocationSelected(fullLocation);
-      
-      Future.delayed(Duration(milliseconds: 100), () {
-        _ignoreNextChange = false;
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      });
-    } else {
-      print('Could not retrieve location coordinates');
-      _ignoreNextChange = false;
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    final location = CustomLocation(name: data['result']['name'], address: data['result']['formatted_address'], latitude: data['result']['geometry']['location']['lat'], longitude: data['result']['geometry']['location']['lng']);
+
+    widget.onLocationSelected(location);
+    _ignoreNextChange = false;
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _onSearchChanged(String query) {
+    if(widget.selectedLocationViaPin) {
+      return;
+    }
     if (_ignoreNextChange) {
       _ignoreNextChange = false;
       return;
@@ -231,22 +224,6 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
       if (query.isNotEmpty) {
         _updateSuggestions(query);
       }
-    });
-  }
-
-  void _revertToLastSelected() {
-    _ignoreNextChange = true;
-    setState(() {
-      searchSuggestions = [];
-    });
-    _animationController.reverse();
-    
-    if (_lastSelectedLocation != null) {
-      widget.controller.text = _lastSelectedText;
-    }
-    
-    Future.delayed(Duration(milliseconds: 100), () {
-      _ignoreNextChange = false;
     });
   }
 
@@ -273,16 +250,19 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
                 focusNode: widget.focusNode,
                 textAlignVertical: TextAlignVertical.center,
                 controller: widget.controller,
-                cursorColor: Colors.black,
+                cursorColor: widget.selectedLocationViaPin ? Colors.white : Colors.black,
+                style: TextStyle(color: widget.selectedLocationViaPin ? Colors.white : Colors.black),
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {
                   if (searchSuggestions.isNotEmpty) {
-                    _selectLocation(searchSuggestions[0]);
+                    _selectLocation(placeIds[0]);
                   }
                   widget.focusNode.unfocus();
                 },
                 decoration: InputDecoration(
-                  prefixIcon: _isLoading 
+                  fillColor: widget.selectedLocationViaPin ? Colors.black : Colors.white,
+                  filled: true,
+                  prefixIcon: _isLoading || widget.locationLoading
                     ? Padding(
                         padding: EdgeInsets.all(12.0),
                         child: SizedBox(
@@ -290,23 +270,23 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.black,
+                            color: widget.selectedLocationViaPin ? Colors.white : Colors.black,
                           ),
                         ),
                       )
-                    : Icon(Icons.location_on, color: Colors.grey.shade800),
+                    : Icon(widget.selectedLocationViaPin ? Icons.location_on_outlined : Icons.location_on, color: widget.selectedLocationViaPin ? Colors.white : Colors.grey.shade800),
                   hintText: 'Where to?',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
+                    borderSide: BorderSide(color: widget.selectedLocationViaPin ? Colors.white : Colors.grey.shade300, width: 2),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade800, width: 2),
+                    borderSide: BorderSide(color: widget.selectedLocationViaPin ? Colors.white : Colors.grey.shade800, width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.black, width: 4),
+                    borderSide: BorderSide(color: widget.selectedLocationViaPin ? Colors.white : Colors.black, width: 4),
                   ),
                 ),
               ),
@@ -324,8 +304,8 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
                       child: ElevatedButton(
                         onPressed: widget.onRequestRide,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
+                          backgroundColor: widget.locationLoading || _isLoading ? Colors.grey.shade300 : Colors.black,
+                          foregroundColor: widget.locationLoading || _isLoading ? Colors.grey.shade800 : Colors.white,
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -373,20 +353,15 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () async {
-                            final suggestion = searchSuggestions[index];
                             widget.focusNode.unfocus();
-                            await _selectLocation(suggestion);
+                            await _selectLocation(placeIds[index]);
                           },
                           borderRadius: BorderRadius.circular(10),
                           child: ListTile(
                             leading: Icon(Icons.location_on, color: Colors.grey.shade700),
                             title: Text(
-                              searchSuggestions[index].name,
+                              searchSuggestions[index],
                               style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: Text(
-                              searchSuggestions[index].address,
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                             ),
                           ),
                         ),
