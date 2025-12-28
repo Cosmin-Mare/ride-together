@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ride_together/home.dart';
 import 'package:ride_together/models.dart';
-import 'package:ride_together/ride_details_page.dart';
 import 'package:ride_together/widgets/custom_button.dart';
-import 'package:ride_together/widgets/location_search_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ConfirmRidePage extends StatefulWidget {
@@ -119,9 +118,10 @@ class _ConfirmRidePageState extends State<ConfirmRidePage> {
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        'profilePicture': user.photoURL,
       };
 
-      final ride = await FirebaseFirestore.instance.collection('rides').add(rideData);
+      await FirebaseFirestore.instance.collection('rides').add(rideData);
 
       if (!mounted) return; // Check if widget is still in tree
       Navigator.pop(context);
@@ -129,7 +129,7 @@ class _ConfirmRidePageState extends State<ConfirmRidePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ride Confirmed Successfully!')),
       );
-      Navigator.push(context, MaterialPageRoute(builder: (context) => RideDetailsPage(ride: Ride(origin: widget.origin, destination: widget.destination, status: RideStatus.pending, createdAt: DateTime.now(), updatedAt: DateTime.now(), userId: user.uid, userName: user.displayName ?? '', id: ride.id))));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
 
     } catch (e) {
       if (!mounted) return;

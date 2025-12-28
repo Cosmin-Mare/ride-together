@@ -4,7 +4,8 @@ import 'package:ride_together/home.dart';
 import 'package:ride_together/models.dart';
 
 class BottomPanel extends StatelessWidget {
-  const BottomPanel({super.key, required this.ride});
+  const BottomPanel({super.key, required this.ride, required this.isDriver});
+  final bool isDriver;
   final Ride ride;
 
   @override
@@ -55,10 +56,10 @@ class BottomPanel extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(ride.origin.name, 
+                    Text(isDriver ? "Your Location" : ride.origin.name, 
                         style: TextStyle(color: Colors.grey[800], fontSize: 14)),
                     const SizedBox(height: 30),
-                    Text(ride.destination.name, 
+                    Text(isDriver ? ride.origin.name : ride.destination.name, 
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -70,7 +71,7 @@ class BottomPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  ride.status.name.toUpperCase(),
+                  ride.status.label.toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white, 
                     fontWeight: FontWeight.bold, 
@@ -96,19 +97,19 @@ class BottomPanel extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundImage: ride.driver?.profilePicture != null 
+                          backgroundImage: isDriver ? ride.profilePicture != null ? NetworkImage(ride.profilePicture!) : null : ride.driver?.profilePicture != null 
                               ? NetworkImage(ride.driver!.profilePicture!) 
                               : null,
-                          child: ride.driver?.profilePicture == null ? const Icon(Icons.person) : null,
+                          child: isDriver ? ride.profilePicture == null ? const Icon(Icons.person) : null : ride.driver?.profilePicture == null ? const Icon(Icons.person) : null,
                         ),
                         const SizedBox(width: 15),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(ride.driver?.name ?? '', 
+                              Text(isDriver ? ride.userName : ride.driver?.name ?? '', 
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              const Text("Your driver is arriving", 
+                              Text(isDriver ? "${ride.userName} is waiting for you" : "Your driver is arriving", 
                                   style: TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),

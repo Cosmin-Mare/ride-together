@@ -2,6 +2,7 @@
     <application
         android:label="ride_together"
         android:name="${applicationName}"
+        android:stopWithTask="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

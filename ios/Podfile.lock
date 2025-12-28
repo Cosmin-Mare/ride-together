@@ -1188,6 +1188,16 @@ PODS:
     - abseil/meta/type_traits
     - abseil/xcprivacy
   - abseil/xcprivacy (1.20240722.0)
+  - AppAuth (2.0.0):
+    - AppAuth/Core (= 2.0.0)
+    - AppAuth/ExternalUserAgent (= 2.0.0)
+  - AppAuth/Core (2.0.0)
+  - AppAuth/ExternalUserAgent (2.0.0):
+    - AppAuth/Core
+  - AppCheckCore (11.2.0):
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - PromisesObjC (~> 2.4)
   - BoringSSL-GRPC (0.0.37):
     - BoringSSL-GRPC/Implementation (= 0.0.37)
     - BoringSSL-GRPC/Interface (= 0.0.37)
@@ -1275,12 +1285,24 @@ PODS:
     - nanopb (~> 3.30910.0)
   - FirebaseSharedSwift (12.6.0)
   - Flutter (1.0.0)
+  - flutter_foreground_task (0.0.1):
+    - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
+  - google_sign_in_ios (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - GoogleSignIn (~> 9.0)
+    - GTMSessionFetcher (>= 3.4.0)
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
+  - GoogleSignIn (9.0.0):
+    - AppAuth (~> 2.0)
+    - AppCheckCore (~> 11.0)
+    - GTMAppAuth (~> 5.0)
+    - GTMSessionFetcher/Core (~> 3.3)
   - GoogleUtilities/AppDelegateSwizzler (8.1.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -1397,7 +1419,14 @@ PODS:
     - gRPC-Core/Privacy (= 1.69.0)
   - gRPC-Core/Interface (1.69.0)
   - gRPC-Core/Privacy (1.69.0)
-  - GTMSessionFetcher/Core (5.0.0)
+  - GTMAppAuth (5.0.0):
+    - AppAuth/Core (~> 2.0)
+    - GTMSessionFetcher/Core (< 4.0, >= 3.3)
+  - GTMSessionFetcher (3.5.0):
+    - GTMSessionFetcher/Full (= 3.5.0)
+  - GTMSessionFetcher/Core (3.5.0)
+  - GTMSessionFetcher/Full (3.5.0):
+    - GTMSessionFetcher/Core
   - leveldb-library (1.22.6)
   - mapbox_maps_flutter (2.17.0):
     - Flutter
@@ -1422,6 +1451,9 @@ PODS:
     - Flutter
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (101.0.0)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - Turf (4.0.0)
 
 DEPENDENCIES:
@@ -1430,14 +1462,19 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_foreground_task (from `.symlinks/plugins/flutter_foreground_task/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
+  - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - mapbox_maps_flutter (from `.symlinks/plugins/mapbox_maps_flutter/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
     - abseil
+    - AppAuth
+    - AppCheckCore
     - BoringSSL-GRPC
     - Firebase
     - FirebaseAppCheckInterop
@@ -1452,9 +1489,11 @@ SPEC REPOS:
     - FirebaseMessaging
     - FirebaseSharedSwift
     - GoogleDataTransport
+    - GoogleSignIn
     - GoogleUtilities
     - "gRPC-C++"
     - gRPC-Core
+    - GTMAppAuth
     - GTMSessionFetcher
     - leveldb-library
     - MapboxCommon
@@ -1476,17 +1515,25 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_foreground_task:
+    :path: ".symlinks/plugins/flutter_foreground_task/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
+  google_sign_in_ios:
+    :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   mapbox_maps_flutter:
     :path: ".symlinks/plugins/mapbox_maps_flutter/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
+  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
+  AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: 45532e0c1fd1f6a5720af8aa0312470c366b73d2
   Firebase: a451a7b61536298fd5cbfe3a746fd40443a50679
@@ -1505,12 +1552,16 @@ SPEC CHECKSUMS:
   FirebaseMessaging: a61bc42dcab3f7a346d94bbb54dab2c9435b18b2
   FirebaseSharedSwift: 79f27fff0addd15c3de19b87fba426f3cc2c964f
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_foreground_task: a159d2c2173b33699ddb3e6c2a067045d7cebb89
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
+  google_sign_in_ios: 00dfa94252eb10278b64828c81bcb7158a81a53a
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
+  GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
-  GTMSessionFetcher: 02d6e866e90bc236f48a703a041dfe43e6221a29
+  GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
+  GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
   mapbox_maps_flutter: a1dfc0a0825a5ded612bea16fc1eecc9c47cbaf8
   MapboxCommon: 5cc0e77733478a7b2a3a28af7c38adc8485e07d8
@@ -1521,8 +1572,9 @@ SPEC CHECKSUMS:
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
 
-PODFILE CHECKSUM: 86e71e817d8f5384a2d144d95501b4f385741e1d
+PODFILE CHECKSUM: 245a1b52bdcef0c800f5958df5c93e062755f8b8
 
 COCOAPODS: 1.16.2

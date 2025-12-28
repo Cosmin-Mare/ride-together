@@ -10,8 +10,9 @@ import 'package:ride_together/models.dart';
 import 'package:ride_together/utils.dart';
 
 class RideDetailsPage extends StatefulWidget {
-  const RideDetailsPage({super.key, required this.ride});
+  const RideDetailsPage({super.key, required this.ride, required this.isDriver});
   final Ride ride;
+  final bool isDriver;
 
   @override
   State<RideDetailsPage> createState() => _RideDetailsPageState();
@@ -212,7 +213,7 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
                       offset: Offset(0, 100 * value),
                       child: Opacity(
                         opacity: (1 - value).clamp(0, 1),
-                        child: BottomPanel(ride: currentRide),
+                        child: BottomPanel(ride: currentRide, isDriver: widget.isDriver),
                       ),
                     );
                   },

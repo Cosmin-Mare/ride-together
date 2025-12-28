@@ -9,7 +9,6 @@ import 'package:ride_together/confirm_ride_page.dart';
 import 'package:ride_together/models.dart';
 import 'package:ride_together/utils.dart';
 import 'package:ride_together/widgets/location_search_bar.dart';
-import 'package:ride_together/ride_details_page.dart';
 
 class RequestRidePage extends StatefulWidget {
   const RequestRidePage({super.key});

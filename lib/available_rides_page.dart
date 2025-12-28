@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ride_together/models.dart';
-import 'package:ride_together/ride_details_page.dart';
 import 'package:ride_together/rides_list.dart';
 
 class AvailableRidesPage extends StatefulWidget {

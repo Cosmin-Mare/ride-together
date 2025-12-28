@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 import 'package:ride_together/home.dart';
 import 'package:ride_together/widgets/custom_text_field.dart';
@@ -43,6 +44,7 @@ class _LoginState extends State<Login> {
               SizedBox(height: 10),
               Text(errorMessage, style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold)),
               CustomButton(
+                size: Size(20, 40),
                 onPressed: () async {
                   try {
                     await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -81,16 +83,24 @@ class _LoginState extends State<Login> {
                 text: "Login",
               ),
               CustomButton(
+                size: Size(20, 40),
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Signup())),
                 text: "Create an account",
               ),
               CustomButton(
+                size: Size(20, 40),
                 onPressed: () async {
-                  await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
+                  GoogleSignIn.instance.initialize(serverClientId: "216937294504-ffol61d6j3hhjuejumcga1sjj94hh96c.apps.googleusercontent.com");
+                  final googleSignInResult = await GoogleSignIn.instance.authenticate();
+                  final result = await FirebaseAuth.instance.signInWithCredential(GoogleAuthProvider.credential(
+                    idToken: googleSignInResult.authentication.idToken,
+                  ));
+                  if(result.user != null){
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+                  }
                 },
                 text: "Login with Google",
               ),
-              
             ],
           ),
         ),
@@ -157,6 +167,7 @@ class _SignupState extends State<Signup> {
               spacing: 10,
               children: [
                 CustomButton(
+                  size: Size(20, 40),
                   onPressed: () async {
                     try {
                       if(passwordController.text != confirmPasswordController.text){
@@ -214,26 +225,29 @@ class _SignupState extends State<Signup> {
                   text: "Sign up",
                 ),
                 CustomButton(
+                  size: Size(20, 40),
                   onPressed: () async {
-                    final result = await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
+                    GoogleSignIn.instance.initialize(serverClientId: "216937294504-ffol61d6j3hhjuejumcga1sjj94hh96c.apps.googleusercontent.com");
+                    final googleSignInResult = await GoogleSignIn.instance.authenticate();
+                    final result = await FirebaseAuth.instance.signInWithCredential(GoogleAuthProvider.credential(
+                      idToken: googleSignInResult.authentication.idToken,
+                    ));
                     if(result.user != null){
                       await FirebaseFirestore.instance.collection('users').doc(result.user!.uid).set({
                         'displayName': result.user!.displayName,
                         'email': result.user!.email,
                         'createdAt': DateTime.now(),
                         'updatedAt': DateTime.now(),
-                        'provider': 'google',
-                        'photoURL': result.user!.photoURL,
-                        'uid': result.user!.uid,
                       });
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
                     }
-                  },
+                                    },
                     text: "Sign up with Google",
                 ),
               ],
             ),
             CustomButton(
-              size: Size(120, 0),
+              size: Size(120, 40),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Login())),
               text: "Login",
             ),

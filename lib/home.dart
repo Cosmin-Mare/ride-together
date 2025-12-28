@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ride_together/login.dart';
 import 'package:ride_together/models.dart';
 import 'package:ride_together/request_ride_page.dart';
 import 'package:ride_together/available_rides_page.dart';
@@ -28,8 +30,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     print("Setting Ride Requested");
     FirebaseFirestore.instance.collection('rides').where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', isNotEqualTo: 'completed').get().then((value) {
       setState(() {
-        print("docs");
-        print(value.docs);
         if(value.docs.isNotEmpty){
           rideRequested = Ride.fromJson({
             ...value.docs[0].data(),
@@ -42,13 +42,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
   void setRideAccepted(){
-    FirebaseFirestore.instance.collection('rides').where('driver', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', isNotEqualTo: 'completed').get().then((value) {
+    FirebaseFirestore.instance.collection('drivers').get().then((value) {
+      for (var doc in value.docs) {
+        print(doc.data());
+      }
+    });
+    FirebaseFirestore.instance.collection('rides').where('driver.userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid).where('status', isNotEqualTo: 'completed').get().then((value) {
+      print("docs");
+      print(value.docs);
       setState(() {
         if(value.docs.isNotEmpty){
           rideAccepted = Ride.fromJson({
             ...value.docs[0].data(),
             'id': value.docs[0].id,
           });
+          print("Ride Accepted: $rideAccepted");  
         } else {
           rideAccepted = null;
         }
@@ -62,10 +70,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Ride Together', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          bottom: const TabBar(
+          actions: [
+            IconButton(onPressed: () {
+              GoogleSignIn.instance.signOut();
+              FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+            }, icon: Icon(Icons.logout)),
+          ],
+          bottom: TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.local_taxi), text: "Request Ride"),
-              Tab(icon: Icon(Icons.people), text: "Friends Waiting"),
+              Tab(icon: Icon(Icons.local_taxi), text: rideRequested != null ? "Ride Requested" : "Request Ride"),
+              Tab(icon: Icon(Icons.people), text: rideAccepted != null ? "Accepted Ride" : "Friends Waiting"),
               Tab(icon: Icon(Icons.history), text: "Ride History"),
             ],
           ),
@@ -74,8 +89,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         body: TabBarView(
           physics: NeverScrollableScrollPhysics(),
           children: [
-            rideRequested != null ? RideDetailsPage(ride: rideRequested!) : RequestRidePage(), 
-            rideAccepted != null ? RideDetailsPage(ride: rideAccepted!) : AvailableRidesPage(),
+            rideRequested != null ? RideDetailsPage(ride: rideRequested!, isDriver: false) : RequestRidePage(), 
+            rideAccepted != null ? RideDetailsPage(ride: rideAccepted!, isDriver: true) : AvailableRidesPage(),
             RideHistoryPage(),
           ],
         ),

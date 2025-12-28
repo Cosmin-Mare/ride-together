@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:http/http.dart' as http;
 import 'package:ride_together/models.dart';
-import 'package:ride_together/ride_details_page.dart';
 
 class LocationSearchBar extends StatefulWidget {
   const LocationSearchBar({
@@ -118,7 +117,6 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
         '&location=${widget.currentPosition?.latitude},${widget.currentPosition?.longitude}'
         '&radius=5000'
       );
-      print(sessionToken);
       final result = await http.get(uri);
       if (!mounted) return;
 
@@ -126,6 +124,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
         final suggestions = json.decode(result.body)['predictions'];
         
         setState(() {
+          print(suggestions);
           searchSuggestions = suggestions.map<String>((s) {
             return s['description'] as String? ?? '';
           }).toList() as List<String>;
@@ -135,7 +134,6 @@ class _LocationSearchBarState extends State<LocationSearchBar> with SingleTicker
           }).toList() as List<String>;
           _isLoading = false;
         });
-        
         if (searchSuggestions.isNotEmpty) {
           _animationController.forward();
         }

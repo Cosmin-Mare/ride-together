@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:ride_together/models.dart';
-import 'package:ride_together/ride_details_page.dart';
 import 'package:ride_together/widgets/custom_button.dart';
 
 class RidesList extends StatefulWidget {
@@ -39,6 +38,7 @@ class _RidesListState extends State<RidesList> {
         'latitude': position.latitude,
         'longitude': position.longitude,
         'profilePicture': FirebaseAuth.instance.currentUser?.photoURL,
+        'userId': FirebaseAuth.instance.currentUser?.uid,
       }
     });
   }

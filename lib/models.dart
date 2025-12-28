@@ -1,14 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum RideStatus {
-  pending,
-  inProgress,
-  arrivedAtOrigin,
-  departedFromOrigin,
-  arrivedAtDestination,
-  completed,
-  cancelled,
+  pending('Pending'),
+  inProgress('In Progress'),
+  arrivedAtOrigin('Arrived at Origin'),
+  departedFromOrigin('Departed from Origin'),
+  arrivedAtDestination('Arrived at Destination'),
+  completed('Completed'),
+  cancelled('Cancelled');
+
+  // The field to hold the string value
+  final String label;
+
+  // Constructor
+  const RideStatus(this.label);
 }
+
 
 class Driver {
   factory Driver.fromJson(Map<String, dynamic> json) {
@@ -16,17 +23,19 @@ class Driver {
         name: json['name'] ?? 'Driver',
         latitude: (json['latitude'] as num).toDouble(),
         longitude: (json['longitude'] as num).toDouble(),
+        userId: json['userId'],
         profilePicture: json['profilePicture']);
   }
   final String name;
   final double latitude;
   final double longitude;
   final String? profilePicture;
-
+  final String userId;
   Driver({
     required this.name,
     required this.latitude,
     required this.longitude,
+    required this.userId,
     this.profilePicture,
   });
 
@@ -36,6 +45,7 @@ class Driver {
       'latitude': latitude,
       'longitude': longitude,
       'profilePicture': profilePicture,
+      'userId': userId,
     };
   }
 }
@@ -85,6 +95,7 @@ class Ride {
       userId: json['userId'],
       userName: json['userName'],
       id: json['id'],
+      profilePicture: json['profilePicture'],
     );
   }
   final CustomLocation origin;
@@ -95,6 +106,7 @@ class Ride {
   final DateTime updatedAt;
   final String userId;
   final String userName;
+  final String? profilePicture;
   final String id;
 
   Ride({
@@ -106,6 +118,7 @@ class Ride {
     required this.updatedAt,
     required this.userId,
     required this.userName,
+    this.profilePicture,
     required this.id,
   });
 }
